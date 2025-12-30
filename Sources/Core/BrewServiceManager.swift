@@ -184,6 +184,26 @@ public final class BrewServiceManager {
         try await runService(action: "info", service: service)
     }
 
+    public func getServiceVersion(service: String) async throws -> String? {
+        do {
+            let output = try await info(service: service)
+            let lines = output.split(separator: "\n", omittingEmptySubsequences: true)
+
+            for line in lines {
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                if trimmed.lowercased().contains("version") {
+                    let parts = trimmed.split(separator: ":", maxSplits: 1)
+                    if parts.count > 1 {
+                        return String(parts[1]).trimmingCharacters(in: .whitespaces)
+                    }
+                }
+            }
+            return nil
+        } catch {
+            return nil
+        }
+    }
+
     public func startAll() async throws -> String {
         try await executeBrewCommand(arguments: ["services", "start", "--all"])
     }

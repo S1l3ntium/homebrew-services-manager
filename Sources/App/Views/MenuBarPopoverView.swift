@@ -7,6 +7,8 @@ struct MenuBarPopoverView: View {
     @State private var searchText = ""
     @State private var hoveredService: String?
     @State private var selectedService: BrewService?
+    @State private var operationInProgress: String?
+    @State private var operationStatus: String = ""
 
     var filteredServices: [BrewService] {
         if searchText.isEmpty {
@@ -50,7 +52,11 @@ struct MenuBarPopoverView: View {
         VStack(spacing: 12) {
             // Кнопка назад
             HStack {
-                Button(action: { selectedService = nil }) {
+                Button(action: {
+                    selectedService = nil
+                    operationInProgress = nil
+                    operationStatus = ""
+                }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.blue)
@@ -68,35 +74,82 @@ struct MenuBarPopoverView: View {
 
             Divider()
 
-            // Информация о сервисе
-            VStack(alignment: .leading, spacing: 10) {
-                infoRow(label: "Статус", value: service.status)
-                infoRow(label: "Пользователь", value: service.user.isEmpty ? "—" : service.user)
-                if let pid = service.pid {
-                    infoRow(label: "PID", value: String(pid))
-                }
-                infoRow(label: "Авто-старт", value: service.autostart ? "Включён" : "Отключён")
-            }
-            .padding(.horizontal, 12)
+            if let operation = operationInProgress {
+                // Статус выполняющейся операции
+                VStack(spacing: 12) {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("Выполнение '\(operation)'...")
+                            .font(.system(size: 13, weight: .medium))
+                        Spacer()
+                    }
 
-            Spacer()
+                    if !operationStatus.isEmpty {
+                        Text(operationStatus)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxHeight: .infinity, alignment: .top)
+            } else {
+                // Информация о сервисе
+                VStack(alignment: .leading, spacing: 10) {
+                    infoRow(label: "Статус", value: service.status)
+                    infoRow(label: "Пользователь", value: service.user.isEmpty ? "—" : service.user)
+                    if let pid = service.pid {
+                        infoRow(label: "PID", value: String(pid))
+                    }
+                    if let version = service.version {
+                        infoRow(label: "Версия", value: version)
+                    }
+                    infoRow(label: "Авто-старт", value: service.autostart ? "Включён" : "Отключён")
+                }
+                .padding(.horizontal, 12)
+
+                Spacer()
+            }
 
             // Кнопки управления
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
-                    actionButtonSmall(icon: "play.fill", label: "Start", color: .green) {
-                        Task { await viewModel.perform(action: "start", for: service, source: .menuBar) }
-                        selectedService = nil
+                    actionButtonSmall(icon: "play.fill", label: "Start", color: .green, isDisabled: operationInProgress != nil) {
+                        operationInProgress = "start"
+                        operationStatus = "Запуск сервиса..."
+                        Task {
+                            await viewModel.perform(action: "start", for: service, source: .menuBar)
+                            operationInProgress = nil
+                            operationStatus = ""
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            selectedService = nil
+                        }
                     }
 
-                    actionButtonSmall(icon: "stop.fill", label: "Stop", color: .red) {
-                        Task { await viewModel.perform(action: "stop", for: service, source: .menuBar) }
-                        selectedService = nil
+                    actionButtonSmall(icon: "stop.fill", label: "Stop", color: .red, isDisabled: operationInProgress != nil) {
+                        operationInProgress = "stop"
+                        operationStatus = "Остановка сервиса..."
+                        Task {
+                            await viewModel.perform(action: "stop", for: service, source: .menuBar)
+                            operationInProgress = nil
+                            operationStatus = ""
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            selectedService = nil
+                        }
                     }
 
-                    actionButtonSmall(icon: "arrow.clockwise", label: "Restart", color: .blue) {
-                        Task { await viewModel.perform(action: "restart", for: service, source: .menuBar) }
-                        selectedService = nil
+                    actionButtonSmall(icon: "arrow.clockwise", label: "Restart", color: .blue, isDisabled: operationInProgress != nil) {
+                        operationInProgress = "restart"
+                        operationStatus = "Перезагрузка сервиса..."
+                        Task {
+                            await viewModel.perform(action: "restart", for: service, source: .menuBar)
+                            operationInProgress = nil
+                            operationStatus = ""
+                            try? await Task.sleep(nanoseconds: 500_000_000)
+                            selectedService = nil
+                        }
                     }
                 }
             }
@@ -118,7 +171,7 @@ struct MenuBarPopoverView: View {
         }
     }
 
-    private func actionButtonSmall(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+    private func actionButtonSmall(icon: String, label: String, color: Color, isDisabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
@@ -129,9 +182,10 @@ struct MenuBarPopoverView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(8)
-            .foregroundColor(color)
+            .foregroundColor(isDisabled ? color.opacity(0.5) : color)
         }
         .buttonStyle(GlassButtonStyle(variant: .compact))
+        .disabled(isDisabled)
     }
 
     // MARK: - Search

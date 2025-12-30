@@ -24,7 +24,32 @@ final class ServiceListViewModel: ObservableObject {
         defer { isLoading = false }
 
         do {
-            let list = try await Task.detached { try await BrewServiceManager().servicesList() }.value
+            let manager = BrewServiceManager()
+            var list = try await Task.detached { try await manager.servicesList() }.value
+
+            // Fetch version information for each service in parallel
+            var versionDict: [String: String] = [:]
+            await withTaskGroup(of: (String, String?).self) { group in
+                for service in list {
+                    group.addTask {
+                        let version = try? await manager.getServiceVersion(service: service.name)
+                        return (service.name, version)
+                    }
+                }
+
+                for await (name, version) in group {
+                    if let version = version {
+                        versionDict[name] = version
+                    }
+                }
+            }
+
+            list = list.map { service in
+                var updated = service
+                updated.version = versionDict[service.name]
+                return updated
+            }
+
             services = list
         } catch {
             let localizedError = error as? LocalizedError
@@ -53,7 +78,11 @@ final class ServiceListViewModel: ObservableObject {
                 toastMessage = successMessage
             }
 
-            await refresh()
+            // Выполняем обновление списка в фоне без блокирования UI
+            Task {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)  // Ждем 1 сек перед обновлением
+                await refresh()
+            }
         } catch let error as BrewError {
             let errorDescription = error.errorDescription ?? String(describing: error)
             if source == .menuBar {
