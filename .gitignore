@@ -1,5 +1,5 @@
 # AI
-.claude
+.claude/
 
 # Build artifacts
 .build/
@@ -37,15 +37,11 @@ HomebrewFormula/
 IMPROVEMENTS.md
 FIXES_REPORT.md
 
-# TRACKED FOR DISTRIBUTION:
-# ✓ Sources/ - Application source code
-# ✓ Tests/ - Test files
-# ✓ Package.swift - Build configuration
-# ✓ build-app-bundle.sh - Build script
-# ✓ PUBLISH.sh - Release automation
-# ✓ homebrew-services-manager.rb - Cask formula
-# ✓ README.md, VERSION.md, LICENSE - Main documentation
-# ✓ DISTRIBUTION.md, HOMEBREW_CASK.md, HOMEBREW_PUBLISHING.md - Distribution docs
-# ✓ INSTALLATION.md, QUICKSTART_HOMEBREW.md - User guides
-# ✓ PROJECT_STATUS.md - Project info
-# ✓ Xcode/ - Assets and configuration
+# Other
+build-app-bundle.sh
+DISTRIBUTION.md
+HOMEBREW_CASK.md
+HOMEBREW_PUBLISHING.md
+homebrew-services-manager.rb
+PUBLISH.sh
+QUICKSTART_HOMEBREW.md
