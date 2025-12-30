@@ -17,73 +17,47 @@ git push -u origin main
 gh release create v1.0 --title "v1.0 - Initial Release" --notes "Первый релиз Homebrew Services Manager"
 ```
 
-## Шаг 2: Подготовка Binary для Cask
+## Шаг 2: Подготовка .app Bundle для Cask
 
-Для Homebrew Cask нужен собранный app bundle. Текущая сборка создает исполняемый файл.
-
-Вариант 1: Используем текущий бинарь (простейший способ)
+Для Homebrew Cask нужен собранный .app bundle (правильный способ для GUI приложений).
 
 ```bash
-# Проверяем сборку
-swift build -c release
+# Используем скрипт для создания полноценного .app bundle
+./build-app-bundle.sh 1.0
 
-# Путь к бинарю
-ls -lh .build/release/HomebrewServicesManager
-# Размер: ~758 KB
+# Результат:
+# .build/release/HomebrewServicesManager.app (748 KB)
+# ├── Contents/
+# │   ├── MacOS/HomebrewServicesManager  (исполняемый файл)
+# │   └── Info.plist                     (конфигурация приложения)
 ```
 
-Вариант 2: Создаем полноценный .app bundle (рекомендуется для UI приложений)
+Скрипт автоматически:
+1. Собирает релиз бинарь
+2. Создает правильную структуру .app bundle
+3. Генерирует Info.plist с правильными параметрами
+4. Упаковывает в zip архив
 
-Для этого нужно обновить Package.swift, чтобы создавать .app, но текущего бинаря достаточно для Cask.
+## Шаг 3: Вычисление SHA256 хеша архива
 
-## Шаг 3: Вычисление SHA256 хеша бинаря
-
-После загрузки бинаря на GitHub нужно вычислить SHA256:
+После упаковки в zip архив нужно вычислить SHA256:
 
 ```bash
-# Скачиваем бинарь с GitHub или вычисляем локально
-shasum -a 256 .build/release/HomebrewServicesManager
+cd .build/release
+shasum -a 256 HomebrewServicesManager.app.zip
+# Выведет: c0ccb7a6ab1119e8ba1a02f6365f0fe3529f2cf74e2c9a9d63c4446b7e7082c2
 ```
 
 ## Шаг 4: Создание Cask Formula
 
-Создайте файл `homebrew-services-manager.rb` с содержимым ниже.
+Используйте файл `homebrew-services-manager.rb` из проекта (уже готов).
 
-**Структура для вашего проекта:**
-
-```
-https://github.com/YOUR_USERNAME/homebrew-services-manager/releases/download/v1.0/HomebrewServicesManager
-```
-
-### Вариант A: Бинарь как исполняемый файл (текущий подход)
+Формула для полного .app bundle:
 
 ```ruby
 cask 'homebrew-services-manager' do
   version '1.0'
-  sha256 '<SHA256_HASH_HERE>'
-
-  url "https://github.com/YOUR_USERNAME/homebrew-services-manager/releases/download/v#{version}/HomebrewServicesManager"
-
-  name 'Homebrew Services Manager'
-  desc 'A lightweight menu bar application for managing Homebrew services'
-  homepage 'https://github.com/YOUR_USERNAME/homebrew-services-manager'
-
-  # Устанавливает бинарь в /usr/local/bin
-  binary 'HomebrewServicesManager', target: 'homebrew-services-manager'
-
-  zap trash: [
-    '~/Library/Preferences/com.homebrew.services-manager.plist',
-    '~/Library/Caches/com.homebrew.services-manager'
-  ]
-end
-```
-
-### Вариант B: Полный .app bundle (если будет создан)
-
-```ruby
-cask 'homebrew-services-manager' do
-  version '1.0'
-  sha256 '<SHA256_HASH_HERE>'
+  sha256 'c0ccb7a6ab1119e8ba1a02f6365f0fe3529f2cf74e2c9a9d63c4446b7e7082c2'
 
   url "https://github.com/YOUR_USERNAME/homebrew-services-manager/releases/download/v#{version}/HomebrewServicesManager.app.zip"
 

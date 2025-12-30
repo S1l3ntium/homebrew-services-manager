@@ -17,24 +17,28 @@ git push -u origin main
 ### 2. Создайте GitHub Release
 
 ```bash
-# Собираем релиз версию
-swift build -c release
+# Собираем и создаем .app bundle
+./build-app-bundle.sh 1.0
+
+# Создаем архив
+cd .build/release
+zip -r HomebrewServicesManager.app.zip HomebrewServicesManager.app
+cd ../..
 
 # Создаем GitHub Release (установите gh CLI сначала)
 gh release create v1.0 \
   --title "v1.0 - Initial Release" \
-  --notes "Homebrew Services Manager - Menu bar app for managing Homebrew services"
-
-# Загружаем бинарь в релиз
-gh release upload v1.0 .build/release/HomebrewServicesManager
+  --notes "Homebrew Services Manager - Menu bar app for managing Homebrew services" \
+  .build/release/HomebrewServicesManager.app.zip
 ```
 
 ### 3. Вычислите SHA256
 
 ```bash
-# Получите хеш загруженного файла
-shasum -a 256 .build/release/HomebrewServicesManager
-# Вывод: abc123... homebrew-services-manager
+# Получите хеш архива
+cd .build/release
+shasum -a 256 HomebrewServicesManager.app.zip
+# Вывод: c0ccb7a6ab1119e8ba1a02f6365f0fe3529f2cf74e2c9a9d63c4446b7e7082c2
 
 # Скопируйте этот хеш - понадобится в формуле
 ```
@@ -55,15 +59,15 @@ mkdir -p Casks
 cat > Casks/homebrew-services-manager.rb << 'EOF'
 cask 'homebrew-services-manager' do
   version '1.0'
-  sha256 'ABC123...'  # ← ЗАМЕНИТЕ НА ПОЛУЧЕННЫЙ ХЕШ
+  sha256 'c0ccb7a6ab1119e8ba1a02f6365f0fe3529f2cf74e2c9a9d63c4446b7e7082c2'
 
-  url "https://github.com/YOUR_USERNAME/homebrew-services-manager/releases/download/v#{version}/HomebrewServicesManager"
+  url "https://github.com/YOUR_USERNAME/homebrew-services-manager/releases/download/v#{version}/HomebrewServicesManager.app.zip"
 
   name 'Homebrew Services Manager'
   desc 'A lightweight menu bar application for managing Homebrew services'
   homepage 'https://github.com/YOUR_USERNAME/homebrew-services-manager'
 
-  binary 'HomebrewServicesManager', target: 'homebrew-services-manager'
+  app 'HomebrewServicesManager.app'
 
   zap trash: [
     '~/Library/Preferences/com.homebrew.services-manager.plist',
@@ -99,13 +103,14 @@ brew install --cask homebrew-services-manager
 ```bash
 # В основном репозитории:
 git tag v1.1
-swift build -c release
-gh release create v1.1 .build/release/HomebrewServicesManager
+./build-app-bundle.sh 1.1
+cd .build/release && zip -r HomebrewServicesManager.app.zip HomebrewServicesManager.app && cd ../..
+gh release create v1.1 .build/release/HomebrewServicesManager.app.zip
 
 # В tap репозитории:
 # Обновите файл Casks/homebrew-services-manager.rb:
 # - Измените version на '1.1'
-# - Обновите sha256 на новый хеш
+# - Обновите sha256 на новый хеш (shasum -a 256 HomebrewServicesManager.app.zip)
 git commit -am "Update homebrew-services-manager to v1.1"
 git push
 ```
