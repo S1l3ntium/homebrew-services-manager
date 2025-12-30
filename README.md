@@ -4,14 +4,27 @@
 
 <div align="center">
 
+### Платформа и язык
 ![macOS](https://img.shields.io/badge/macOS-13.0+-blue?style=flat-square&logo=apple)
 ![Swift](https://img.shields.io/badge/Swift-5.8+-orange?style=flat-square&logo=swift)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Version](https://img.shields.io/badge/Version-1.0-blue?style=flat-square)
 
+### Статистика проекта
 ![GitHub Stars](https://img.shields.io/github/stars/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
 ![GitHub Forks](https://img.shields.io/github/forks/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
-![Downloads](https://img.shields.io/badge/downloads-via%20Homebrew-blue?style=flat-square)
+![GitHub Issues](https://img.shields.io/github/issues/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
+![GitHub Contributors](https://img.shields.io/github/contributors/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
+
+### Активность
+![Last Commit](https://img.shields.io/github/last-commit/S1l3ntium/homebrew-services-manager?style=flat-square&logo=git&labelColor=181717)
+![Commit Activity](https://img.shields.io/github/commit-activity/m/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
+
+### Установка
+![Downloads](https://img.shields.io/badge/distribution-Homebrew-red?style=flat-square&logo=homebrew)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
+
+---
 
 **[Быстрый старт](#установка)** • **[Документация](#документация)** • **[Участие](#участие)**
 
