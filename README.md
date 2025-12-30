@@ -1,221 +1,361 @@
-# Homebrew Services Manager
+# 🍺 Homebrew Services Manager
 
-A lightweight menu bar application for managing Homebrew services on macOS.
+> Элегантное управление Homebrew сервисами прямо из меню macOS
 
-## Features
+<div align="center">
 
-### 🎯 Core Features
+![macOS](https://img.shields.io/badge/macOS-13.0+-blue?style=flat-square&logo=apple)
+![Swift](https://img.shields.io/badge/Swift-5.8+-orange?style=flat-square&logo=swift)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Version](https://img.shields.io/badge/Version-1.0-blue?style=flat-square)
 
-- **Menu Bar Integration** - Always accessible from the menu bar
-- **Service List** - Clean, searchable list of all Homebrew services
-- **Service Management** - Start, Stop, Restart services with a single click
-- **Real-time Status** - Animated indicator showing active operations
-- **Desktop Notifications** - Get notified when operations complete
-- **Service Details** - View comprehensive information about each service
+**[Быстрый старт](#установка)** • **[Документация](#документация)** • **[Участие](#участие)**
 
-### 📊 Service Information
+</div>
 
-- **Status** - Current running state
-- **User** - User running the service
-- **PID** - Process ID (when running)
-- **Version** - Installed package version
-- **Auto-start** - Whether service auto-starts on login
-- **Config Access** - Direct link to service configuration file
-- **Logs Access** - Quick access to service logs
+---
 
-### ⚡ Performance
+## 📸 Скриншоты
 
-- **Background Updates** - Refresh happens in background without blocking UI
-- **Parallel Version Fetching** - Efficiently loads version info for all services
-- **Caching** - Smart caching of Homebrew path for faster operations
-- **Async/Await** - Modern Swift concurrency throughout
+<div align="center">
 
-## Installation
+### Основное окно приложения
+![Main Window](screenshots/main.png)
 
-### Install via Homebrew Cask (Recommended)
+### Детали сервиса
+![Service Detail](screenshots/service-detail.png)
+
+</div>
+
+---
+
+## ✨ Возможности
+
+### 🎯 Основной функционал
+- **🎨 Интеграция с меню-баром** — Быстрый доступ из строки меню
+- **📋 Список сервисов** — Все установленные сервисы в одном месте
+- **⚡ Управление** — Запуск, остановка, перезагрузка одним кликом
+- **🔄 Реал-тайм статус** — Анимированный индикатор текущих операций
+- **🔔 Уведомления** — Оповещения о завершении операций
+- **📊 Информация о сервисе** — Детальные данные каждого сервиса
+
+### 📊 Информация о сервисах
+| Параметр | Описание |
+|----------|---------|
+| **Статус** | Текущее состояние (запущен/остановлен) |
+| **Пользователь** | От какого пользователя запущен |
+| **PID** | ID процесса (когда активен) |
+| **Версия** | Установленная версия пакета |
+| **Автозапуск** | Запускается ли при входе в систему |
+| **Конфиг** | Быстрый доступ к файлу конфигурации |
+| **Логи** | Просмотр логов сервиса |
+
+### ⚡ Производительность
+```
+┌─────────────────────────────────────┐
+│ Фоновое обновление статуса          │ Не блокирует UI
+├─────────────────────────────────────┤
+│ Параллельная загрузка версий        │ Быстрое создание списка
+├─────────────────────────────────────┤
+│ Кэширование путей Homebrew          │ Экономия ресурсов
+├─────────────────────────────────────┤
+│ Async/Await конкурентность          │ Современный Swift
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Установка
+
+### 📦 Через Homebrew Cask (рекомендуется)
 
 ```bash
 brew tap S1l3ntium/tap
 brew install --cask homebrew-services-manager
 ```
 
-See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions.
+После установки приложение появится в меню-баре. Просто запустите его, и он будет готов к работе!
 
-### Build from Source
+📖 Подробнее: [INSTALLATION.md](INSTALLATION.md)
 
-1. Clone the repository:
+### 🔨 Компиляция из исходников
+
+**Требования:**
+- macOS 13.0+
+- Swift 5.8+ (поставляется с Xcode 14.3+)
+- Homebrew установлен
+
+**Процесс:**
 
 ```bash
+# 1. Клонирование репозитория
 git clone https://github.com/S1l3ntium/homebrew-services-manager.git
 cd homebrew-services-manager
-```
 
-2. Build the application:
-
-```bash
+# 2. Сборка
 swift build -c release
-```
 
-3. Run the application:
-
-```bash
+# 3. Запуск
 .build/release/HomebrewServicesManager
 ```
 
-### Requirements
+---
 
-- macOS 13.0 or later
-- Swift 5.8+ (comes with Xcode 14.3+)
-- Homebrew installed (for the app to work)
+## 📖 Использование
 
-## Usage
+### Базовая работа
+1. **Запустите приложение** — иконка появится в меню-баре
+2. **Кликните на иконку** (шкаф с серверами) в меню-баре
+3. **Выберите сервис** из списка
+4. **Управляйте сервисом** кнопками «Запустить/Остановить/Перезагрузить»
 
-1. Run the application
-2. Click the menu bar icon (server rack icon)
-3. Browse your installed Homebrew services
-4. Click on a service to view details
-5. Use Start/Stop/Restart buttons to manage services
+### ⌨️ Горячие клавиши
+| Клавиша | Действие |
+|---------|----------|
+| **Cmd+Q** | Закрыть приложение (когда открыто меню) |
 
-### Keyboard Shortcuts
+---
 
-- **Cmd+Q** - Quit application (when popover is open)
+## 🏗️ Архитектура
 
-## Architecture
+### 🎨 Дизайн-паттерны
+```
+┌──────────────────────────────────────┐
+│         Presentation Layer           │
+│  (MenuBarPopoverView, ServiceRow)    │
+├──────────────────────────────────────┤
+│           ViewModel Layer            │
+│     (ServiceListViewModel)           │
+├──────────────────────────────────────┤
+│          Business Logic              │
+│    (BrewServiceManager)              │
+├──────────────────────────────────────┤
+│           Data Layer                 │
+│   (Models, BrewError Handling)       │
+└──────────────────────────────────────┘
 
-### Design Pattern
+Паттерны:
+✓ MVVM (Model-View-ViewModel)
+✓ Async/Await (Modern Concurrency)
+✓ Combine (Reactive Updates)
+```
 
-- **MVVM** - Model-View-ViewModel architecture
-- **Async/Await** - Modern Swift concurrency
-- **Observable** - Combine framework for reactive updates
+### 📂 Структура проекта
+```
+Sources/
+├── Core/
+│   ├── BrewServiceManager          Интеграция с Homebrew CLI
+│   ├── Models/                     Структуры данных
+│   └── BrewError                   Обработка ошибок
+├── App/
+│   ├── ServiceListViewModel        Управление состоянием
+│   ├── MenuBarPopoverView          Главный интерфейс
+│   └── MenuBarController           Жизненный цикл приложения
+└── SystemModule/
+    └── NotificationsManager        Desktop уведомления
+```
 
-### Key Components
+### 🧵 Модель потоков
+```
+┌─ Main Thread ──────────────────────┐
+│ • UI обновления                    │
+│ • Анимации                         │
+│ • Обработка пользовательского ввода│
+└────────────────────────────────────┘
 
-#### Core Layer (`Sources/Core/`)
+┌─ Background Threads ───────────────┐
+│ • Операции с Homebrew             │
+│ • Загрузка версий сервисов         │
+│ • Правильная отмена и очистка      │
+└────────────────────────────────────┘
+```
 
-- `BrewServiceManager` - Interface to Homebrew CLI
-- `Models` - Data structures for services
-- `BrewError` - Error handling with LocalizedError
+---
 
-#### App Layer (`Sources/App/`)
+## 🎨 Дизайн
 
-- `ServiceListViewModel` - State management
-- `MenuBarPopoverView` - Main UI
-- `MenuBarController` - Menu bar lifecycle
+### Концепция
+```
+Liquid Glass Design (Жидкое стекло)
+     ↓
+┌─ Modern macOS Aesthetic ────────────┐
+│ • Полупрозрачные компоненты        │
+│ • Плавные анимации (0.15-0.7s)      │
+│ • Отзывчивые состояния (hover/etc)  │
+│ • Полная поддержка Dark Mode        │
+│ • Высокое разрешение (Retina)       │
+└─────────────────────────────────────┘
+```
 
-#### System Layer (`Sources/SystemModule/`)
+### Компоненты UI
+| Компонент | Описание |
+|-----------|---------|
+| **Service Row** | Полностью кликабельная строка с кнопками действий |
+| **Service Detail** | Организованная панель с информацией сервиса |
+| **Pulse Indicator** | Анимированный индикатор во время операций |
+| **Glass Buttons** | Современный стиль кнопок с эффектом стекла |
 
-- `NotificationsManager` - Desktop notifications
+---
 
-### Threading Model
+## 🌍 Локализация
 
-- Main thread: UI updates, animations
-- Background tasks: Homebrew operations, version fetching
-- Proper cancellation and cleanup on operation completion
-
-## UI/UX
-
-### Design System
-
-- **Liquid Glass** - Modern macOS aesthetic
-- **Smooth Animations** - 0.15-0.7s transitions
-- **Responsive Feedback** - Hover states, disabled states
-- **Dark Mode** - Full support for system dark mode
-
-### Components
-
-- **Service Row** - Full-row clickable with action buttons
-- **Service Detail** - Organized information panel
-- **Pulse Indicator** - Animated status during operations
-- **Glass Buttons** - Modern button styling
-
-## Localization
-
-The application includes a localization framework (`L10n` enum) ready for multi-language support:
+Приложение готово к поддержке нескольких языков:
 
 ```swift
 enum L10n {
-    static let start = NSLocalizedString("start", value: "Start", comment: "Start action")
-    // ... more strings
+    static let start = NSLocalizedString("start", ...)
+    static let stop = NSLocalizedString("stop", ...)
+    // ... и другие строки
 }
 ```
 
-Supported/Ready for:
-
+**Поддерживаемые/готовые к поддержке:**
 - 🇬🇧 English
-- 🇷🇺 Russian
-- 🌐 Other languages (infrastructure in place)
+- 🇷🇺 Russian (Русский)
+- 🌐 Другие языки (инфраструктура готова)
 
-## Error Handling
+---
 
-Comprehensive error handling with user-friendly messages:
+## ⚠️ Обработка ошибок
 
-- **Homebrew Not Found** - Clear instructions to install
-- **Execution Failed** - Detailed error messages
-- **Authentication Required** - Prompts for admin access
-- **Invalid Output** - Graceful degradation
+Приложение обладает комплексной обработкой ошибок с понятными пользователю сообщениями:
 
-## Development
+```
+Homebrew не найден
+    ↓
+[Показываются инструкции по установке]
 
-### Building
+Не удалось выполнить команду
+    ↓
+[Детальное описание проблемы]
 
+Требуется администраторский доступ
+    ↓
+[Запрос пароля с объяснением]
+
+Неверный формат вывода
+    ↓
+[Корректная обработка, сохранение функциональности]
+```
+
+---
+
+## 👨‍💻 Разработка
+
+### 🏗️ Собрать проект
 ```bash
 swift build
 ```
 
-### Running
-
+### ▶️ Запустить в режиме разработки
 ```bash
 swift run HomebrewServicesManager
 ```
 
-### Testing
-
+### 🧪 Запустить тесты
 ```bash
 swift test
 ```
 
-### Code Style
-
-- Swift 5.5+ with modern concurrency
-- Proper error handling with LocalizedError
-- Clear variable naming and organization
-- No forced unwraps or force casts
-
-## Known Limitations
-
-- Requires Homebrew to be installed
-- Some operations may require admin password
-- Log access depends on service log directory existence
-
-## Future Enhancements
-
-- [ ] Multi-service batch operations (start/stop all)
-- [ ] Service filtering by status
-- [ ] Custom service groups
-- [ ] Keyboard-only navigation
-- [ ] Touch Bar support
-- [ ] Service settings/configuration UI
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-
-- Clean build with no warnings
-- Proper error handling
-- Modern async/await patterns
-- Meaningful commit messages
-
-## Credits
-
-Built with:
-
-- Swift 5.5+
-- SwiftUI
-- Combine
-- macOS AppKit
+### 📋 Стандарты кода
+✓ Swift 5.5+ с современной конкурентностью
+✓ Правильная обработка ошибок (LocalizedError)
+✓ Ясные имена переменных и организация
+✓ Без force unwrap и force cast
 
 ---
 
-**Version:** 1.0
-**Last Updated:** 2025-12-30
-**Platform:** macOS 11.0+
+## 📋 Известные ограничения
+
+- Требует установленный Homebrew
+- Некоторые операции могут требовать пароль администратора
+- Доступ к логам зависит от существования директории логов сервиса
+
+---
+
+## 🎯 Планируемые функции
+
+```
+┌─ v1.1+ Дорожная карта ──────────────────────┐
+│                                             │
+│ ☐ Групповые операции (запуск/остановка все) │
+│ ☐ Фильтрация по статусу                     │
+│ ☐ Пользовательские группы сервисов          │
+│ ☐ Навигация только клавиатурой              │
+│ ☐ Поддержка Touch Bar                       │
+│ ☐ UI настроек сервисов                      │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## 🤝 Участие
+
+Мы рады contributions! Пожалуйста, убедитесь:
+
+✓ Чистая сборка без предупреждений
+✓ Правильная обработка ошибок
+✓ Современные async/await паттерны
+✓ Информативные commit messages
+
+```bash
+# Создайте свою ветку
+git checkout -b feature/your-feature
+
+# Сделайте коммит
+git commit -am "Add: описание вашей функции"
+
+# Запушьте в свой форк
+git push origin feature/your-feature
+
+# Создайте Pull Request на GitHub
+```
+
+---
+
+## 📚 Документация
+
+- [**INSTALLATION.md**](INSTALLATION.md) — Подробное руководство по установке
+- [**DISTRIBUTION.md**](DISTRIBUTION.md) — Информация о дистрибуции
+- Локальные файлы скриптов (не отслеживаются в git):
+  - `build-app-bundle.sh` — Создание .app bundle
+  - `PUBLISH.sh` — Автоматизация релиза
+  - `SCRIPTS_USAGE.md` — Руководство по скриптам
+
+---
+
+## 🛠️ Технический стек
+
+| Компонент | Версия | Описание |
+|-----------|--------|---------|
+| **Swift** | 5.8+ | Основной язык программирования |
+| **SwiftUI** | Latest | Фреймворк для UI |
+| **AppKit** | macOS 13+ | Интеграция с системой |
+| **Combine** | Latest | Реактивное программирование |
+| **Foundation** | Standard | Базовые компоненты |
+
+---
+
+## 📄 Лицензия
+
+MIT License — смотрите [LICENSE](LICENSE) для деталей
+
+---
+
+## 👨‍🔬 Об авторе
+
+**Homebrew Services Manager** создан как демонстрация лучших практик разработки macOS приложений на Swift с использованием современных паттернов и инструментов.
+
+<div align="center">
+
+**[⬆ Вернуться наверх](#-homebrew-services-manager)**
+
+---
+
+**Версия:** 1.0
+**Последнее обновление:** 2025-12-30
+**Платформа:** macOS 13.0+
+**Статус:** ✅ Готово к использованию
+
+</div>
