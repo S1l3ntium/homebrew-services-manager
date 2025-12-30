@@ -7,7 +7,13 @@ cask 'homebrew-services-manager' do
   desc 'A lightweight menu bar application for managing Homebrew services on macOS'
   homepage 'https://github.com/S1l3ntium/homebrew-services-manager'
 
-  app 'HomebrewServicesManager.app'
+  app 'HomebrewServicesManager.app' do |app|
+    FileUtils.rm_rf("#{app}/_CodeSignature")
+  end
+
+  postflight do
+    system_command 'xattr', args: ['-d', 'com.apple.quarantine', "#{staged_path}/HomebrewServicesManager.app"]
+  end
 
   zap trash: [
     '~/Library/Preferences/com.homebrew.services-manager.plist',
