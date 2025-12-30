@@ -6,7 +6,7 @@
 
 ```bash
 # Add the tap
-brew tap USERNAME/tap
+brew tap S1l3ntium/tap
 
 # Install the application
 brew install --cask homebrew-services-manager
@@ -18,7 +18,7 @@ brew install --cask homebrew-services-manager
 
 ```bash
 # Clone the repository
-git clone https://github.com/USERNAME/homebrew-services-manager.git
+git clone https://github.com/S1l3ntium/homebrew-services-manager.git
 cd homebrew-services-manager
 
 # Build the release version
@@ -30,7 +30,7 @@ swift build -c release
 
 ### Option 3: Download Release Binary
 
-1. Go to [Releases](https://github.com/USERNAME/homebrew-services-manager/releases)
+1. Go to [Releases](https://github.com/S1l3ntium/homebrew-services-manager/releases)
 2. Download `HomebrewServicesManager` binary
 3. Make it executable:
    ```bash
@@ -56,7 +56,7 @@ brew uninstall --cask homebrew-services-manager
 
 ```bash
 # Добавляем tap репозиторий
-brew tap USERNAME/tap
+brew tap S1l3ntium/tap
 
 # Устанавливаем приложение
 brew install --cask homebrew-services-manager
@@ -68,7 +68,7 @@ brew install --cask homebrew-services-manager
 
 ```bash
 # Клонируем репозиторий
-git clone https://github.com/USERNAME/homebrew-services-manager.git
+git clone https://github.com/S1l3ntium/homebrew-services-manager.git
 cd homebrew-services-manager
 
 # Собираем релизную версию
@@ -80,7 +80,7 @@ swift build -c release
 
 ### Способ 3: Скачать готовый бинарь
 
-1. Перейдите на страницу [Releases](https://github.com/USERNAME/homebrew-services-manager/releases)
+1. Перейдите на страницу [Releases](https://github.com/S1l3ntium/homebrew-services-manager/releases)
 2. Скачайте бинарь `HomebrewServicesManager`
 3. Сделайте его исполняемым:
    ```bash
@@ -145,7 +145,7 @@ The application requires Homebrew to be installed. Install it from https://brew.
 ## Support / Поддержка
 
 For issues or questions:
-- Open an issue on GitHub: https://github.com/USERNAME/homebrew-services-manager/issues
+- Open an issue on GitHub: https://github.com/S1l3ntium/homebrew-services-manager/issues
 - Check existing documentation in README.md
 
 ---
