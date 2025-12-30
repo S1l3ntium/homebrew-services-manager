@@ -1,0 +1,44 @@
+{
+	"configurations": [
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:homebrew-services-manager}",
+			"name": "Debug hsmanager-cli",
+			"target": "hsmanager-cli",
+			"configuration": "debug",
+			"preLaunchTask": "swift: Build Debug hsmanager-cli"
+		},
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:homebrew-services-manager}",
+			"name": "Release hsmanager-cli",
+			"target": "hsmanager-cli",
+			"configuration": "release",
+			"preLaunchTask": "swift: Build Release hsmanager-cli"
+		},
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:homebrew-services-manager}",
+			"name": "Debug HomebrewServicesManager",
+			"target": "HomebrewServicesManager",
+			"configuration": "debug",
+			"preLaunchTask": "swift: Build Debug HomebrewServicesManager"
+		},
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:homebrew-services-manager}",
+			"name": "Release HomebrewServicesManager",
+			"target": "HomebrewServicesManager",
+			"configuration": "release",
+			"preLaunchTask": "swift: Build Release HomebrewServicesManager"
+		}
+	]
+}
