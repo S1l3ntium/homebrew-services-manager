@@ -41,5 +41,5 @@ FIXES_REPORT.md
 build-app-bundle.sh
 PUBLISH.sh
 UPDATE_CASK.sh
-
+RELEASE_WORKFLOW.txt
 SCRIPTS_USAGE.md
