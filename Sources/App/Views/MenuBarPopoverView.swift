@@ -137,22 +137,39 @@ struct MenuBarPopoverView: View {
                     }
                     infoRow(label: "Авто-старт", value: service.autostart ? "Включён" : "Отключён")
 
-                    // Кнопка для открытия конфига
-                    if let plistPath = BrewServiceManager().getServicePlist(service: service.name) {
-                        Button(action: {
-                            NSWorkspace.shared.open(URL(fileURLWithPath: plistPath))
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "doc.text")
-                                    .font(.system(size: 12, weight: .medium))
-                                Text("Открыть конфиг")
-                                    .font(.system(size: 12, weight: .medium))
+                    // Кнопки для открытия конфига и логов
+                    HStack(spacing: 12) {
+                        if let plistPath = BrewServiceManager().getServicePlist(service: service.name) {
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(fileURLWithPath: plistPath))
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "doc.text")
+                                        .font(.system(size: 11, weight: .medium))
+                                    Text("Конфиг")
+                                        .font(.system(size: 11, weight: .medium))
+                                }
+                                .foregroundColor(.blue)
                             }
-                            .foregroundColor(.blue)
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
-                        .padding(.top, 4)
+
+                        if let logsDir = BrewServiceManager().getServiceLogsDirectory(service: service.name) {
+                            Button(action: {
+                                NSWorkspace.shared.open(URL(fileURLWithPath: logsDir))
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "list.bullet.clipboard")
+                                        .font(.system(size: 11, weight: .medium))
+                                    Text("Логи")
+                                        .font(.system(size: 11, weight: .medium))
+                                }
+                                .foregroundColor(.blue)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+                    .padding(.top, 6)
                 }
                 .padding(.horizontal, 12)
 

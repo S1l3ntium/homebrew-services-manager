@@ -213,6 +213,17 @@ public final class BrewServiceManager {
         return nil
     }
 
+    public func getServiceLogsDirectory(service: String) -> String? {
+        let homeDir = NSHomeDirectory()
+        let logsPath = "\(homeDir)/Library/Logs/Homebrew/\(service)"
+
+        if fileManager.fileExists(atPath: logsPath) {
+            return logsPath
+        }
+
+        return nil
+    }
+
     public func startAll() async throws -> String {
         try await executeBrewCommand(arguments: ["services", "start", "--all"])
     }
