@@ -47,14 +47,10 @@ final class ServiceListViewModel: ObservableObject {
             list = list.map { service in
                 var updated = service
                 updated.version = versionDict[service.name]
-                if let version = updated.version {
-                    print("[ServiceListViewModel] Updated version for '\(service.name)': \(version)")
-                }
                 return updated
             }
 
             services = list
-            print("[ServiceListViewModel] Refresh complete. Services: \(list.count)")
         } catch {
             let localizedError = error as? LocalizedError
             errorMessage = localizedError?.errorDescription ?? String(describing: error)

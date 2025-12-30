@@ -186,24 +186,15 @@ public final class BrewServiceManager {
 
     public func getServiceVersion(service: String) async throws -> String? {
         do {
-            let output = try await info(service: service)
-            let lines = output.split(separator: "\n", omittingEmptySubsequences: true)
+            let output = try await executeBrewCommand(arguments: ["list", service, "--versions"])
+            let parts = output.split(separator: " ", omittingEmptySubsequences: true)
 
-            for line in lines {
-                let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.lowercased().contains("version") {
-                    let parts = trimmed.split(separator: ":", maxSplits: 1)
-                    if parts.count > 1 {
-                        let version = String(parts[1]).trimmingCharacters(in: .whitespaces)
-                        print("[BrewServiceManager] Version for '\(service)': \(version)")
-                        return version
-                    }
-                }
+            if parts.count >= 2 {
+                return String(parts[1]).trimmingCharacters(in: .whitespacesAndNewlines)
             }
-            print("[BrewServiceManager] No version found for '\(service)'")
+
             return nil
         } catch {
-            print("[BrewServiceManager] Error getting version for '\(service)': \(error)")
             return nil
         }
     }
