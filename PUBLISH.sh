@@ -9,7 +9,7 @@ set -e
 
 VERSION=${1:-"1.0"}
 BINARY_PATH=".build/release/HomebrewServicesManager"
-GITHUB_USERNAME="YOUR_USERNAME"
+GITHUB_USERNAME="S1l3ntium"
 
 echo "📦 Homebrew Services Manager - Publication Script"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
