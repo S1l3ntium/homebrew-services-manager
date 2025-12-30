@@ -194,12 +194,16 @@ public final class BrewServiceManager {
                 if trimmed.lowercased().contains("version") {
                     let parts = trimmed.split(separator: ":", maxSplits: 1)
                     if parts.count > 1 {
-                        return String(parts[1]).trimmingCharacters(in: .whitespaces)
+                        let version = String(parts[1]).trimmingCharacters(in: .whitespaces)
+                        print("[BrewServiceManager] Version for '\(service)': \(version)")
+                        return version
                     }
                 }
             }
+            print("[BrewServiceManager] No version found for '\(service)'")
             return nil
         } catch {
+            print("[BrewServiceManager] Error getting version for '\(service)': \(error)")
             return nil
         }
     }

@@ -1,10 +1,12 @@
 import SwiftUI
 import Core
+import SystemModule
+import UserNotifications
 
 @main
 struct HomebrewServicesManagerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     var body: some Scene {
         // Убираем WindowGroup - приложение работает только через menu bar
         Settings {
@@ -17,12 +19,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Скрываем иконку в Dock
         NSApp.setActivationPolicy(.accessory)
-        
+
+        // Запрашиваем авторизацию для уведомлений
+        Task {
+            try? await NotificationsManager.shared.requestAuthorization()
+        }
+
         // Инициализируем menu bar controller
         Task { @MainActor in
             MenuBarController.shared.setup()
         }
-        
+
         print("[AppDelegate] Menu bar app initialized")
     }
     

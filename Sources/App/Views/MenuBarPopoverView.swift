@@ -9,6 +9,7 @@ struct MenuBarPopoverView: View {
     @State private var selectedService: BrewService?
     @State private var operationInProgress: String?
     @State private var operationStatus: String = ""
+    @State private var isInitialLoad = true
 
     var filteredServices: [BrewService] {
         if searchText.isEmpty {
@@ -29,7 +30,7 @@ struct MenuBarPopoverView: View {
             // Список сервисов или детали выбранного сервиса
             if let selected = selectedService {
                 serviceDetailView(for: selected)
-            } else if viewModel.isLoading {
+            } else if isInitialLoad && viewModel.isLoading {
                 loadingView
             } else if filteredServices.isEmpty {
                 emptyView
@@ -44,6 +45,11 @@ struct MenuBarPopoverView: View {
         }
         .frame(width: 360, height: 500)
         .background(Color(nsColor: .windowBackgroundColor).opacity(0.95))
+        .onChange(of: viewModel.services) { newServices in
+            if isInitialLoad && !newServices.isEmpty {
+                isInitialLoad = false
+            }
+        }
     }
 
     // MARK: - Service Detail View
