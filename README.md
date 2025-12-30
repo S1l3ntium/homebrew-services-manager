@@ -5,6 +5,7 @@ A lightweight menu bar application for managing Homebrew services on macOS.
 ## Features
 
 ### 🎯 Core Features
+
 - **Menu Bar Integration** - Always accessible from the menu bar
 - **Service List** - Clean, searchable list of all Homebrew services
 - **Service Management** - Start, Stop, Restart services with a single click
@@ -13,6 +14,7 @@ A lightweight menu bar application for managing Homebrew services on macOS.
 - **Service Details** - View comprehensive information about each service
 
 ### 📊 Service Information
+
 - **Status** - Current running state
 - **User** - User running the service
 - **PID** - Process ID (when running)
@@ -22,6 +24,7 @@ A lightweight menu bar application for managing Homebrew services on macOS.
 - **Logs Access** - Quick access to service logs
 
 ### ⚡ Performance
+
 - **Background Updates** - Refresh happens in background without blocking UI
 - **Parallel Version Fetching** - Efficiently loads version info for all services
 - **Caching** - Smart caching of Homebrew path for faster operations
@@ -32,7 +35,7 @@ A lightweight menu bar application for managing Homebrew services on macOS.
 ### Install via Homebrew Cask (Recommended)
 
 ```bash
-brew tap YOUR_USERNAME/tap
+brew tap S1l3ntium/tap
 brew install --cask homebrew-services-manager
 ```
 
@@ -41,12 +44,14 @@ See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions.
 ### Build from Source
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/homebrew-services-manager.git
 cd homebrew-services-manager
 ```
 
 2. Build the application:
+
 ```bash
 swift build -c release
 ```
@@ -58,6 +63,7 @@ swift build -c release
 ```
 
 ### Requirements
+
 - macOS 13.0 or later
 - Swift 5.8+ (comes with Xcode 14.3+)
 - Homebrew installed (for the app to work)
@@ -71,11 +77,13 @@ swift build -c release
 5. Use Start/Stop/Restart buttons to manage services
 
 ### Keyboard Shortcuts
+
 - **Cmd+Q** - Quit application (when popover is open)
 
 ## Architecture
 
 ### Design Pattern
+
 - **MVVM** - Model-View-ViewModel architecture
 - **Async/Await** - Modern Swift concurrency
 - **Observable** - Combine framework for reactive updates
@@ -83,19 +91,23 @@ swift build -c release
 ### Key Components
 
 #### Core Layer (`Sources/Core/`)
+
 - `BrewServiceManager` - Interface to Homebrew CLI
 - `Models` - Data structures for services
 - `BrewError` - Error handling with LocalizedError
 
 #### App Layer (`Sources/App/`)
+
 - `ServiceListViewModel` - State management
 - `MenuBarPopoverView` - Main UI
 - `MenuBarController` - Menu bar lifecycle
 
 #### System Layer (`Sources/SystemModule/`)
+
 - `NotificationsManager` - Desktop notifications
 
 ### Threading Model
+
 - Main thread: UI updates, animations
 - Background tasks: Homebrew operations, version fetching
 - Proper cancellation and cleanup on operation completion
@@ -103,12 +115,14 @@ swift build -c release
 ## UI/UX
 
 ### Design System
+
 - **Liquid Glass** - Modern macOS aesthetic
 - **Smooth Animations** - 0.15-0.7s transitions
 - **Responsive Feedback** - Hover states, disabled states
 - **Dark Mode** - Full support for system dark mode
 
 ### Components
+
 - **Service Row** - Full-row clickable with action buttons
 - **Service Detail** - Organized information panel
 - **Pulse Indicator** - Animated status during operations
@@ -126,6 +140,7 @@ enum L10n {
 ```
 
 Supported/Ready for:
+
 - 🇬🇧 English
 - 🇷🇺 Russian
 - 🌐 Other languages (infrastructure in place)
@@ -142,21 +157,25 @@ Comprehensive error handling with user-friendly messages:
 ## Development
 
 ### Building
+
 ```bash
 swift build
 ```
 
 ### Running
+
 ```bash
 swift run HomebrewServicesManager
 ```
 
 ### Testing
+
 ```bash
 swift test
 ```
 
 ### Code Style
+
 - Swift 5.5+ with modern concurrency
 - Proper error handling with LocalizedError
 - Clear variable naming and organization
@@ -180,18 +199,16 @@ swift test
 ## Contributing
 
 Contributions are welcome! Please ensure:
+
 - Clean build with no warnings
 - Proper error handling
 - Modern async/await patterns
 - Meaningful commit messages
 
-## License
-
-[Add your license here]
-
 ## Credits
 
 Built with:
+
 - Swift 5.5+
 - SwiftUI
 - Combine
