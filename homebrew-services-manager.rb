@@ -1,6 +1,6 @@
 cask 'homebrew-services-manager' do
   version '1.0'
-  sha256 '13dd29bcb3b45114c0dcaa97149e0f74a7b5223c9b74e5eba0b1b03289bbb863'
+  sha256 '7e5dc3e0358d66d41e00b12a1fcca549305c1282f59b59d7c93e5284e381ec68'
 
   url "https://github.com/S1l3ntium/homebrew-services-manager/releases/download/v#{version}/HomebrewServicesManager.app.zip"
   name 'Homebrew Services Manager'

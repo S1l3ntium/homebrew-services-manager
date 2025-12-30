@@ -68,18 +68,10 @@ cat > "$CONTENTS_DIR/Info.plist" << 'EOF'
     <string>VERSION_PLACEHOLDER</string>
     <key>CFBundleVersion</key>
     <string>1</string>
-    <key>NSMainStoryboardFile</key>
-    <string></string>
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
     <string>Homebrew Services Manager. All rights reserved.</string>
-    <key>NSRequiresIPhoneOS</key>
-    <false/>
-    <key>UIStatusBarStyle</key>
-    <string>UIStatusBarStyleDefault</string>
-    <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
     <key>LSUIElement</key>
     <true/>
 </dict>
@@ -90,6 +82,12 @@ EOF
 sed -i '' "s/VERSION_PLACEHOLDER/$VERSION/g" "$CONTENTS_DIR/Info.plist"
 
 echo "✓ Info.plist created"
+echo ""
+
+# Step 4.5: Sign the application
+echo "🔏 Step 4.5: Signing application..."
+codesign --force --deep --sign - "$APP_BUNDLE" 2>/dev/null || true
+echo "✓ Application signed (ad-hoc)"
 echo ""
 
 # Step 5: Verify bundle
