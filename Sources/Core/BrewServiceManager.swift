@@ -199,6 +199,20 @@ public final class BrewServiceManager {
         }
     }
 
+    public func getServicePlist(service: String) -> String? {
+        let homeDir = NSHomeDirectory()
+        let launchAgentPath = "\(homeDir)/Library/LaunchAgents/homebrew.mxcl.\(service).plist"
+        let launchDaemonPath = "/Library/LaunchDaemons/homebrew.mxcl.\(service).plist"
+
+        if fileManager.fileExists(atPath: launchAgentPath) {
+            return launchAgentPath
+        } else if fileManager.fileExists(atPath: launchDaemonPath) {
+            return launchDaemonPath
+        }
+
+        return nil
+    }
+
     public func startAll() async throws -> String {
         try await executeBrewCommand(arguments: ["services", "start", "--all"])
     }

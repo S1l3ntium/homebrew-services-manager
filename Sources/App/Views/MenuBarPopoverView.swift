@@ -136,6 +136,23 @@ struct MenuBarPopoverView: View {
                         infoRow(label: "Версия", value: version)
                     }
                     infoRow(label: "Авто-старт", value: service.autostart ? "Включён" : "Отключён")
+
+                    // Кнопка для открытия конфига
+                    if let plistPath = BrewServiceManager().getServicePlist(service: service.name) {
+                        Button(action: {
+                            NSWorkspace.shared.open(URL(fileURLWithPath: plistPath))
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "doc.text")
+                                    .font(.system(size: 12, weight: .medium))
+                                Text("Открыть конфиг")
+                                    .font(.system(size: 12, weight: .medium))
+                            }
+                            .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 4)
+                    }
                 }
                 .padding(.horizontal, 12)
 
