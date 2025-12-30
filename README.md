@@ -29,11 +29,20 @@ A lightweight menu bar application for managing Homebrew services on macOS.
 
 ## Installation
 
+### Install via Homebrew Cask (Recommended)
+
+```bash
+brew tap YOUR_USERNAME/tap
+brew install --cask homebrew-services-manager
+```
+
+See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions.
+
 ### Build from Source
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/YOUR_USERNAME/homebrew-services-manager.git
 cd homebrew-services-manager
 ```
 
@@ -42,15 +51,16 @@ cd homebrew-services-manager
 swift build -c release
 ```
 
-3. The built app will be available at:
-```
-.build/release/HomebrewServicesManager.app
+3. Run the application:
+
+```bash
+.build/release/HomebrewServicesManager
 ```
 
 ### Requirements
-- macOS 11.0 or later
-- Swift 5.5+ (comes with Xcode 13+)
-- Homebrew installed
+- macOS 13.0 or later
+- Swift 5.8+ (comes with Xcode 14.3+)
+- Homebrew installed (for the app to work)
 
 ## Usage
 
