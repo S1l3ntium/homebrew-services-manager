@@ -1,0 +1,118 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           Homebrew Services Manager - Release Workflow                      ║
+║                                                                            ║
+║  Теперь полностью автоматизирован! 🚀                                     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+┌─ БЫСТРЫЙ ПУТЬ (РЕКОМЕНДУЕТСЯ) ──────────────────────────────────────────┐
+│                                                                           │
+│  $ ./PUBLISH.sh 1.0                                                      │
+│                                                                           │
+│  ✓ Собирает .app bundle                                                  │
+│  ✓ Создает ZIP архив                                                    │
+│  ✓ Вычисляет SHA256                                                     │
+│  ✓ Создает git tag                                                      │
+│  ✓ Обновляет Cask формулу (автоматически!)                             │
+│  ✓ Выводит инструкции для GitHub Release                               │
+│                                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌─ ДЕТАЛЬНЫЙ ПОТОК ──────────────────────────────────────────────────────┐
+│                                                                        │
+│  1️⃣  Подготовка кода                                                  │
+│     ├─ git add .                                                       │
+│     ├─ git commit -m "Prepare for v1.0 release"                       │
+│     └─ git push                                                        │
+│                                                                        │
+│  2️⃣  Запуск публикации (ВСЁ АВТОМАТИЧНО!)                             │
+│     └─ ./PUBLISH.sh 1.0                                              │
+│        │                                                              │
+│        ├─→ build-app-bundle.sh 1.0                                    │
+│        │   ├─ swift build -c release                                 │
+│        │   ├─ Создает .app структуру                                │
+│        │   ├─ Подписывает приложение                                │
+│        │   └─ Проверяет целостность                                 │
+│        │                                                              │
+│        ├─→ Создает ZIP архив                                         │
+│        │   └─ .build/release/HomebrewServicesManager.app.zip         │
+│        │                                                              │
+│        ├─→ Вычисляет SHA256                                          │
+│        │   └─ a2a092558dcbdc37...                                   │
+│        │                                                              │
+│        ├─→ Создает git tag                                           │
+│        │   └─ git tag v1.0                                          │
+│        │                                                              │
+│        └─→ UPDATE_CASK.sh 1.0 <SHA256> [НОВОЕ! 🎉]                   │
+│            ├─ Находит ../homebrew-tap/                              │
+│            ├─ Обновляет version и sha256                            │
+│            ├─ git add & git commit                                  │
+│            └─ Готово к push!                                         │
+│                                                                        │
+│  3️⃣  Создание GitHub Release                                          │
+│     └─ gh release create v1.0 \                                      │
+│        --title "v1.0 - Release" \                                   │
+│        .build/release/HomebrewServicesManager.app.zip               │
+│                                                                        │
+│  4️⃣  Пуш обновлений в homebrew-tap                                    │
+│     ├─ cd ../homebrew-tap                                            │
+│     └─ git push origin main                                          │
+│        (коммит уже сделан UPDATE_CASK.sh!)                          │
+│                                                                        │
+│  ✅ Готово! Пользователи могут устанавливать через Homebrew         │
+│     brew tap S1l3ntium/tap                                            │
+│     brew install --cask homebrew-services-manager                    │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+
+┌─ ЧТО ИЗМЕНИЛОСЬ С ДОБАВЛЕНИЕМ UPDATE_CASK.sh ──────────────────────┐
+│                                                                     │
+│  ❌ РАНЬШЕ (Ручное обновление):                                    │
+│     1. ./PUBLISH.sh 1.0                                           │
+│     2. Переходить в папку homebrew-tap                            │
+│     3. Вручную редактировать homebrew-services-manager.rb         │
+│     4. git add, git commit, git push                              │
+│     ⏱️  Занимало 5-10 минут, легко допустить ошибку               │
+│                                                                     │
+│  ✅ ТЕПЕРЬ (Полностью автоматизировано):                           │
+│     1. ./PUBLISH.sh 1.0                                           │
+│        (всё включает UPDATE_CASK.sh внутри!)                      │
+│     2. cd ../homebrew-tap && git push origin main                 │
+│     ⏱️  Занимает 2-3 минуты, без ошибок!                           │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─ СТРУКТУРА ПАПОК ──────────────────────────────────────────────────┐
+│                                                                     │
+│  Work/Mac Apps/                                                     │
+│  ├── homebrew-services-manager/           ← ЭТОТ ПРОЕКТ           │
+│  │   ├── build-app-bundle.sh              ← Создает .app          │
+│  │   ├── PUBLISH.sh                       ← Полная автоматизация  │
+│  │   ├── UPDATE_CASK.sh                   ← Обновляет формулу     │
+│  │   ├── SCRIPTS_USAGE.md                 ← Документация          │
+│  │   ├── Sources/                                                 │
+│  │   ├── .build/release/                                          │
+│  │   │   └── HomebrewServicesManager.app.zip                      │
+│  │   └── README.md                                                │
+│  │                                                                 │
+│  └── homebrew-tap/                        ← TAP РЕПОЗИТОРИЙ       │
+│      ├── Casks/                                                   │
+│      │   └── homebrew-services-manager.rb ← ОБНОВЛЯЕТСЯ            │
+│      ├── .git/                                                    │
+│      └── ...                                                      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+🎯 РЕКОМЕНДУЕМЫЙ ПРОЦЕСС РЕЛИЗА:
+
+  $ git add . && git commit -m "Prepare for v1.0 release" && git push
+  $ ./PUBLISH.sh 1.0
+  $ gh release create v1.0 --title "v1.0 - Release" .build/release/*.zip
+  $ cd ../homebrew-tap && git push origin main
+  
+  ГОТОВО! 🎉
+
+📚 ДОКУМЕНТАЦИЯ:
+   - SCRIPTS_USAGE.md - Подробное описание каждого скрипта
+   - UPDATE_CASK.sh --help - (пока нет, но есть примеры в начале файла)
+   - README.md - Основная документация проекта
+

@@ -40,4 +40,6 @@ FIXES_REPORT.md
 # Local scripts and configuration (developer-specific)
 build-app-bundle.sh
 PUBLISH.sh
+UPDATE_CASK.sh
+
 SCRIPTS_USAGE.md
