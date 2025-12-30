@@ -11,6 +11,7 @@ struct MenuBarPopoverView: View {
     @State private var operationStatus: String = ""
     @State private var isInitialLoad = true
     @State private var operatingServiceName: String?
+    @State private var pulseScale: CGFloat = 1.0
 
     var filteredServices: [BrewService] {
         if searchText.isEmpty {
@@ -82,25 +83,46 @@ struct MenuBarPopoverView: View {
             Divider()
 
             if let operation = operationInProgress {
-                // Статус выполняющейся операции
-                VStack(spacing: 12) {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Выполнение '\(operation)'...")
-                            .font(.system(size: 13, weight: .medium))
+                // Статус выполняющейся операции с пульсирующим индикатором
+                VStack(spacing: 16) {
+                    HStack(spacing: 12) {
+                        // Пульсирующий кружок
+                        ZStack {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 16, height: 16)
+                                .scaleEffect(pulseScale)
+
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 10, height: 10)
+                        }
+                        .onAppear {
+                            withAnimation(Animation.easeInOut(duration: 0.7).repeatForever(autoreverses: true)) {
+                                pulseScale = 1.6
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(operation.capitalized + "ing...")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.blue)
+
+                            if !operationStatus.isEmpty {
+                                Text(operationStatus)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
                         Spacer()
                     }
-
-                    if !operationStatus.isEmpty {
-                        Text(operationStatus)
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                    }
+                    .padding(12)
+                    .background(Color.blue.opacity(0.08))
+                    .cornerRadius(8)
                 }
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
                 .frame(maxHeight: .infinity, alignment: .top)
             } else {
                 // Информация о сервисе
@@ -249,36 +271,23 @@ struct MenuBarPopoverView: View {
                         service: service,
                         isHovered: hoveredService == service.name,
                         onStart: {
-                            operatingServiceName = service.name
-                            operationInProgress = "start"
                             Task {
                                 await viewModel.perform(action: "start", for: service, source: .menuBar)
-                                operatingServiceName = nil
-                                operationInProgress = nil
                             }
                         },
                         onStop: {
-                            operatingServiceName = service.name
-                            operationInProgress = "stop"
                             Task {
                                 await viewModel.perform(action: "stop", for: service, source: .menuBar)
-                                operatingServiceName = nil
-                                operationInProgress = nil
                             }
                         },
                         onRestart: {
-                            operatingServiceName = service.name
-                            operationInProgress = "restart"
                             Task {
                                 await viewModel.perform(action: "restart", for: service, source: .menuBar)
-                                operatingServiceName = nil
-                                operationInProgress = nil
                             }
                         },
                         onSelect: {
                             selectedService = service
-                        },
-                        operationInProgress: operatingServiceName == service.name ? operationInProgress : nil
+                        }
                     )
                     .onHover { hovering in
                         hoveredService = hovering ? service.name : nil
@@ -351,10 +360,8 @@ struct MenuBarServiceRowView: View {
     let onStop: () -> Void
     let onRestart: () -> Void
     let onSelect: () -> Void
-    let operationInProgress: String?
 
     @State private var showActions = false
-    @State private var pulseScale: CGFloat = 1.0
 
     private var statusColor: Color {
         let status = service.status.lowercased()
@@ -382,28 +389,10 @@ struct MenuBarServiceRowView: View {
             }
 
             HStack(spacing: 12) {
-                // Статус индикатор с пульсацией при операции
-                if operationInProgress != nil {
-                    ZStack {
-                        Circle()
-                            .fill(Color.blue.opacity(0.3))
-                            .frame(width: 12, height: 12)
-                            .scaleEffect(pulseScale)
-
-                        Circle()
-                            .fill(Color.blue)
-                            .frame(width: 8, height: 8)
-                    }
-                    .onAppear {
-                        withAnimation(Animation.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
-                            pulseScale = 1.5
-                        }
-                    }
-                } else {
-                    Circle()
-                        .fill(statusColor)
-                        .frame(width: 8, height: 8)
-                }
+                // Статус индикатор
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 8, height: 8)
 
                 // Название сервиса
                 VStack(alignment: .leading, spacing: 2) {
@@ -411,17 +400,10 @@ struct MenuBarServiceRowView: View {
                         .font(.system(size: 13, weight: .medium))
                         .lineLimit(1)
 
-                    if let operation = operationInProgress {
-                        Text(operation.capitalized + "ing...")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.blue)
-                            .lineLimit(1)
-                    } else {
-                        Text(service.status)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
+                    Text(service.status)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -429,9 +411,9 @@ struct MenuBarServiceRowView: View {
                 // Кнопки управления (показываются при наведении)
                 if isHovered || showActions {
                     HStack(spacing: 6) {
-                        actionButton(icon: "play.fill", color: .green, isDisabled: operationInProgress != nil, action: onStart)
-                        actionButton(icon: "stop.fill", color: .red, isDisabled: operationInProgress != nil, action: onStop)
-                        actionButton(icon: "arrow.clockwise", color: .blue, isDisabled: operationInProgress != nil, action: onRestart)
+                        actionButton(icon: "play.fill", color: .green, action: onStart)
+                        actionButton(icon: "stop.fill", color: .red, action: onStop)
+                        actionButton(icon: "arrow.clockwise", color: .blue, action: onRestart)
                     }
                     .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
@@ -448,15 +430,14 @@ struct MenuBarServiceRowView: View {
         }
     }
 
-    private func actionButton(icon: String, color: Color, isDisabled: Bool = false, action: @escaping () -> Void) -> some View {
+    private func actionButton(icon: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(isDisabled ? color.opacity(0.5) : color)
+                .foregroundColor(color)
                 .frame(width: 24, height: 24)
         }
         .buttonStyle(GlassButtonStyle(variant: .compact))
-        .disabled(isDisabled)
     }
 }
 
