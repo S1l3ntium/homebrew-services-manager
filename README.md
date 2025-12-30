@@ -9,6 +9,9 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Version](https://img.shields.io/badge/Version-1.0-blue?style=flat-square)
 
+![GitHub Stars](https://img.shields.io/github/stars/S1l3ntium/homebrew-services-manager?style=flat-square&logo=github&labelColor=181717)
+![GitHub Views](https://img.shields.io/badge/views-∞-brightgreen?style=flat-square)
+
 **[Быстрый старт](#установка)** • **[Документация](#документация)** • **[Участие](#участие)**
 
 </div>
