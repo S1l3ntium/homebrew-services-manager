@@ -1,35 +1,194 @@
 # Homebrew Services Manager
 
-Нативное macOS-приложение для управления сервисами, установленными через Homebrew.
+A lightweight menu bar application for managing Homebrew services on macOS.
 
-Цели этого репозитория:
+## Features
 
-- Быстрый прототип CLI для взаимодействия с `brew services`.
-- Шаблоны для Homebrew Cask и Formula для распространения GUI и/или CLI.
-- Исходная структура для последующей реализации SwiftUI-приложения.
+### 🎯 Core Features
+- **Menu Bar Integration** - Always accessible from the menu bar
+- **Service List** - Clean, searchable list of all Homebrew services
+- **Service Management** - Start, Stop, Restart services with a single click
+- **Real-time Status** - Animated indicator showing active operations
+- **Desktop Notifications** - Get notified when operations complete
+- **Service Details** - View comprehensive information about each service
 
-Структура:
+### 📊 Service Information
+- **Status** - Current running state
+- **User** - User running the service
+- **PID** - Process ID (when running)
+- **Version** - Installed package version
+- **Auto-start** - Whether service auto-starts on login
+- **Config Access** - Direct link to service configuration file
+- **Logs Access** - Quick access to service logs
 
-- `Package.swift` — Swift Package с CLI и модулями Core/System.
-- `Sources/` — `CLI`, `Core`, `System`.
-- `Scripts/build.sh` — скрипт сборки CLI.
-- `HomebrewFormula/` — шаблоны Cask и Formula.
-- `dist/` — сборочные артефакты (CLI, dmg и т.п.).
+### ⚡ Performance
+- **Background Updates** - Refresh happens in background without blocking UI
+- **Parallel Version Fetching** - Efficiently loads version info for all services
+- **Caching** - Smart caching of Homebrew path for faster operations
+- **Async/Await** - Modern Swift concurrency throughout
 
-Быстрый старт (требуется Swift 5.8+, macOS 13+):
+## Installation
 
+### Build from Source
+
+1. Clone the repository:
 ```bash
-# собрать CLI
-cd /path/to/HomebrewServicesManager
-bash Scripts/build.sh
-
-# запустить
-./dist/hsmanager-cli
+git clone <repository-url>
+cd homebrew-services-manager
 ```
 
-Дальнейшие шаги:
+2. Build the application:
+```bash
+swift build -c release
+```
 
-- Реализовать GUI на SwiftUI + AppKit мост (Xcode проект).
-- Добавить SMJobBless helper для операций, требующих root.
-- Автоматизировать сборку .dmg и подпись/нотаризацию для релизов.
-- Заполнить `homebrew-services-manager-cask.rb` URL и sha256 релизного .dmg.
+3. The built app will be available at:
+```
+.build/release/HomebrewServicesManager.app
+```
+
+### Requirements
+- macOS 11.0 or later
+- Swift 5.5+ (comes with Xcode 13+)
+- Homebrew installed
+
+## Usage
+
+1. Run the application
+2. Click the menu bar icon (server rack icon)
+3. Browse your installed Homebrew services
+4. Click on a service to view details
+5. Use Start/Stop/Restart buttons to manage services
+
+### Keyboard Shortcuts
+- **Cmd+Q** - Quit application (when popover is open)
+
+## Architecture
+
+### Design Pattern
+- **MVVM** - Model-View-ViewModel architecture
+- **Async/Await** - Modern Swift concurrency
+- **Observable** - Combine framework for reactive updates
+
+### Key Components
+
+#### Core Layer (`Sources/Core/`)
+- `BrewServiceManager` - Interface to Homebrew CLI
+- `Models` - Data structures for services
+- `BrewError` - Error handling with LocalizedError
+
+#### App Layer (`Sources/App/`)
+- `ServiceListViewModel` - State management
+- `MenuBarPopoverView` - Main UI
+- `MenuBarController` - Menu bar lifecycle
+
+#### System Layer (`Sources/SystemModule/`)
+- `NotificationsManager` - Desktop notifications
+
+### Threading Model
+- Main thread: UI updates, animations
+- Background tasks: Homebrew operations, version fetching
+- Proper cancellation and cleanup on operation completion
+
+## UI/UX
+
+### Design System
+- **Liquid Glass** - Modern macOS aesthetic
+- **Smooth Animations** - 0.15-0.7s transitions
+- **Responsive Feedback** - Hover states, disabled states
+- **Dark Mode** - Full support for system dark mode
+
+### Components
+- **Service Row** - Full-row clickable with action buttons
+- **Service Detail** - Organized information panel
+- **Pulse Indicator** - Animated status during operations
+- **Glass Buttons** - Modern button styling
+
+## Localization
+
+The application includes a localization framework (`L10n` enum) ready for multi-language support:
+
+```swift
+enum L10n {
+    static let start = NSLocalizedString("start", value: "Start", comment: "Start action")
+    // ... more strings
+}
+```
+
+Supported/Ready for:
+- 🇬🇧 English
+- 🇷🇺 Russian
+- 🌐 Other languages (infrastructure in place)
+
+## Error Handling
+
+Comprehensive error handling with user-friendly messages:
+
+- **Homebrew Not Found** - Clear instructions to install
+- **Execution Failed** - Detailed error messages
+- **Authentication Required** - Prompts for admin access
+- **Invalid Output** - Graceful degradation
+
+## Development
+
+### Building
+```bash
+swift build
+```
+
+### Running
+```bash
+swift run HomebrewServicesManager
+```
+
+### Testing
+```bash
+swift test
+```
+
+### Code Style
+- Swift 5.5+ with modern concurrency
+- Proper error handling with LocalizedError
+- Clear variable naming and organization
+- No forced unwraps or force casts
+
+## Known Limitations
+
+- Requires Homebrew to be installed
+- Some operations may require admin password
+- Log access depends on service log directory existence
+
+## Future Enhancements
+
+- [ ] Multi-service batch operations (start/stop all)
+- [ ] Service filtering by status
+- [ ] Custom service groups
+- [ ] Keyboard-only navigation
+- [ ] Touch Bar support
+- [ ] Service settings/configuration UI
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+- Clean build with no warnings
+- Proper error handling
+- Modern async/await patterns
+- Meaningful commit messages
+
+## License
+
+[Add your license here]
+
+## Credits
+
+Built with:
+- Swift 5.5+
+- SwiftUI
+- Combine
+- macOS AppKit
+
+---
+
+**Version:** 1.0
+**Last Updated:** 2025-12-30
+**Platform:** macOS 11.0+
