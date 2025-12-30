@@ -1,6 +1,46 @@
+# Build artifacts
 .build/
 dist/
+
+# macOS system files
 .DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+
+# Xcode
 *.xcworkspace
 *.xcuserdatad
 *.xcodeproj/xcuserdata
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# IDE
+.vscode/launch.json
+.idea/
+*.swiftpm/
+
+# Dependencies
+.package.resolved
+
+# Temporary files
+*.tmp
+*.temp
+
+# Old scripts and development files (not needed for distribution)
+Scripts/
+HomebrewFormula/
+IMPROVEMENTS.md
+FIXES_REPORT.md
+
+# Keep these for distribution:
+# ✓ Sources/ - Application source code
+# ✓ Tests/ - Test files
+# ✓ Package.swift - Build configuration
+# ✓ build-app-bundle.sh - Build script
+# ✓ PUBLISH.sh - Release automation
+# ✓ homebrew-services-manager.rb - Cask formula
+# ✓ README.md, VERSION.md, LICENSE - Documentation
+# ✓ HOMEBREW_*.md, INSTALLATION.md, DISTRIBUTION.md, QUICKSTART_HOMEBREW.md
+# ✓ Xcode/ - Assets and configuration
