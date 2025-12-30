@@ -28,30 +28,21 @@ public final class NotificationsManager {
     }
 
     public func send(title: String, body: String) {
-        if isAppBundle {
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            content.sound = .default
-
-            let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-            print("[NotificationsManager] sending UN notification: \(title) - \(body)")
-            UNUserNotificationCenter.current().add(req) { error in
-                if let e = error {
-                    fputs("Notification error: \(e)\n", stderr)
-                }
-            }
+        guard isAppBundle else {
             return
         }
 
-        // Fallback for non-bundle runs (e.g. `swift run`) — use the older NSUserNotification API.
-        if #available(macOS 10.14, *) {
-            print("[NotificationsManager] sending NSUserNotification fallback: \(title) - \(body)")
-            let n = NSUserNotification()
-            n.title = title
-            n.informativeText = body
-            n.soundName = NSUserNotificationDefaultSoundName
-            NSUserNotificationCenter.default.deliver(n)
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        print("[NotificationsManager] sending notification: \(title) - \(body)")
+        UNUserNotificationCenter.current().add(req) { error in
+            if let e = error {
+                fputs("Notification error: \(e)\n", stderr)
+            }
         }
     }
 }

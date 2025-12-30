@@ -14,6 +14,10 @@ final class MenuBarController {
 
     private init() {}
 
+    @MainActor public func attach(viewModel: ServiceListViewModel) {
+        self.viewModel = viewModel
+    }
+
     @MainActor public func setup() {
         // Создаем ViewModel
         self.viewModel = ServiceListViewModel()

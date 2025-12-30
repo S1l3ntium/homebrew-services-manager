@@ -6,97 +6,169 @@ struct MenuBarPopoverView: View {
     @ObservedObject var viewModel: ServiceListViewModel
     @State private var searchText = ""
     @State private var hoveredService: String?
-    
+    @State private var selectedService: BrewService?
+
     var filteredServices: [BrewService] {
         if searchText.isEmpty {
             return viewModel.services
         }
         return viewModel.services.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // Заголовок с Liquid Glass эффектом
-            headerView
-            
-            Divider()
-            
-            // Поиск
+            // Поиск (без заголовка с иконкой)
             searchView
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-            
+                .padding(.vertical, 10)
+
             Divider()
-            
-            // Список сервисов
-            if viewModel.isLoading {
+
+            // Список сервисов или детали выбранного сервиса
+            if let selected = selectedService {
+                serviceDetailView(for: selected)
+            } else if viewModel.isLoading {
                 loadingView
             } else if filteredServices.isEmpty {
                 emptyView
             } else {
                 servicesListView
             }
-            
+
             Divider()
-            
+
             // Футер с кнопками
             footerView
         }
         .frame(width: 360, height: 500)
         .background(Color(nsColor: .windowBackgroundColor).opacity(0.95))
     }
-    
-    // MARK: - Header
-    
-    private var headerView: some View {
-        HStack {
-            Image(systemName: "server.rack")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(.blue)
-            
-            Text("Homebrew Services")
-                .font(.system(size: 16, weight: .semibold))
-            
+
+    // MARK: - Service Detail View
+
+    private func serviceDetailView(for service: BrewService) -> some View {
+        VStack(spacing: 12) {
+            // Кнопка назад
+            HStack {
+                Button(action: { selectedService = nil }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(.plain)
+
+                Text(service.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(1)
+
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+
+            Divider()
+
+            // Информация о сервисе
+            VStack(alignment: .leading, spacing: 10) {
+                infoRow(label: "Статус", value: service.status)
+                infoRow(label: "Пользователь", value: service.user.isEmpty ? "—" : service.user)
+                if let pid = service.pid {
+                    infoRow(label: "PID", value: String(pid))
+                }
+                infoRow(label: "Авто-старт", value: service.autostart ? "Включён" : "Отключён")
+            }
+            .padding(.horizontal, 12)
+
             Spacer()
-            
-            // Кнопка обновления с Liquid Glass
+
+            // Кнопки управления
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    actionButtonSmall(icon: "play.fill", label: "Start", color: .green) {
+                        Task { await viewModel.perform(action: "start", for: service, source: .menuBar) }
+                        selectedService = nil
+                    }
+
+                    actionButtonSmall(icon: "stop.fill", label: "Stop", color: .red) {
+                        Task { await viewModel.perform(action: "stop", for: service, source: .menuBar) }
+                        selectedService = nil
+                    }
+
+                    actionButtonSmall(icon: "arrow.clockwise", label: "Restart", color: .blue) {
+                        Task { await viewModel.perform(action: "restart", for: service, source: .menuBar) }
+                        selectedService = nil
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+        }
+    }
+
+    private func infoRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+        }
+    }
+
+    private func actionButtonSmall(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .medium))
+                    .frame(height: 16)
+                Text(label)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(8)
+            .foregroundColor(color)
+        }
+        .buttonStyle(GlassButtonStyle(variant: .compact))
+    }
+
+    // MARK: - Search
+
+    private var searchView: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+                .font(.system(size: 13))
+
+            TextField("Search services...", text: $searchText)
+                .textFieldStyle(.plain)
+                .font(.system(size: 12))
+
+            if !searchText.isEmpty {
+                Button(action: { searchText = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 13))
+                }
+                .buttonStyle(.plain)
+            }
+
+            Spacer()
+
+            // Кнопка обновления маленькая
             Button(action: {
                 Task {
                     await viewModel.refresh()
                 }
             }) {
                 Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.primary)
-                    .frame(width: 28, height: 28)
             }
-            .buttonStyle(GlassButtonStyle())
+            .buttonStyle(.plain)
             .disabled(viewModel.isLoading)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-    }
-    
-    // MARK: - Search
-    
-    private var searchView: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-                .font(.system(size: 14))
-            
-            TextField("Search services...", text: $searchText)
-                .textFieldStyle(.plain)
-                .font(.system(size: 13))
-            
-            if !searchText.isEmpty {
-                Button(action: { searchText = "" }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                        .font(.system(size: 14))
-                }
-                .buttonStyle(.plain)
-            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
@@ -105,14 +177,14 @@ struct MenuBarPopoverView: View {
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
     }
-    
+
     // MARK: - Services List
-    
+
     private var servicesListView: some View {
         ScrollView {
             LazyVStack(spacing: 4) {
                 ForEach(filteredServices, id: \.name) { service in
-                    ServiceRowView(
+                    MenuBarServiceRowView(
                         service: service,
                         isHovered: hoveredService == service.name,
                         onStart: {
@@ -129,6 +201,9 @@ struct MenuBarPopoverView: View {
                             Task {
                                 await viewModel.perform(action: "restart", for: service, source: .menuBar)
                             }
+                        },
+                        onSelect: {
+                            selectedService = service
                         }
                     )
                     .onHover { hovering in
@@ -140,9 +215,9 @@ struct MenuBarPopoverView: View {
             .padding(.vertical, 8)
         }
     }
-    
+
     // MARK: - Loading & Empty States
-    
+
     private var loadingView: some View {
         VStack(spacing: 12) {
             ProgressView()
@@ -153,16 +228,16 @@ struct MenuBarPopoverView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     private var emptyView: some View {
         VStack(spacing: 12) {
             Image(systemName: "tray")
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
-            
+
             Text(searchText.isEmpty ? "No services found" : "No results")
                 .font(.system(size: 14, weight: .medium))
-            
+
             if searchText.isEmpty {
                 Text("Run 'brew services' to see services")
                     .font(.system(size: 12))
@@ -171,17 +246,17 @@ struct MenuBarPopoverView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     // MARK: - Footer
-    
+
     private var footerView: some View {
         HStack(spacing: 8) {
             Text("\(filteredServices.count) service(s)")
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
-            
+
             Spacer()
-            
+
             Button("Quit") {
                 NSApp.terminate(nil)
             }
@@ -195,15 +270,16 @@ struct MenuBarPopoverView: View {
 
 // MARK: - Service Row with Liquid Glass
 
-struct ServiceRowView: View {
+struct MenuBarServiceRowView: View {
     let service: BrewService
     let isHovered: Bool
     let onStart: () -> Void
     let onStop: () -> Void
     let onRestart: () -> Void
-    
+    let onSelect: () -> Void
+
     @State private var showActions = false
-    
+
     private var statusColor: Color {
         let status = service.status.lowercased()
         if status.contains("start") {
@@ -216,56 +292,61 @@ struct ServiceRowView: View {
             return .orange
         }
     }
-    
+
     var body: some View {
-        HStack(spacing: 12) {
-            // Статус индикатор
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
-            
-            // Название сервиса
-            VStack(alignment: .leading, spacing: 2) {
-                Text(service.name)
-                    .font(.system(size: 13, weight: .medium))
-                    .lineLimit(1)
-                
-                Text(service.status)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+        ZStack {
+            // Фон с Liquid Glass эффектом при наведении
+            if isHovered {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+                    )
             }
-            
-            Spacer()
-            
-            // Кнопки управления (показываются при наведении)
-            if isHovered || showActions {
-                HStack(spacing: 6) {
-                    actionButton(icon: "play.fill", color: .green, action: onStart)
-                    actionButton(icon: "stop.fill", color: .red, action: onStop)
-                    actionButton(icon: "arrow.clockwise", color: .blue, action: onRestart)
+
+            HStack(spacing: 12) {
+                // Статус индикатор
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 8, height: 8)
+
+                // Название сервиса
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(service.name)
+                        .font(.system(size: 13, weight: .medium))
+                        .lineLimit(1)
+
+                    Text(service.status)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
                 }
-                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+
+                Spacer()
+
+                // Кнопки управления (показываются при наведении)
+                if isHovered || showActions {
+                    HStack(spacing: 6) {
+                        actionButton(icon: "play.fill", color: .green, action: onStart)
+                        actionButton(icon: "stop.fill", color: .red, action: onStop)
+                        actionButton(icon: "arrow.clockwise", color: .blue, action: onRestart)
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundColor(.primary)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            ZStack {
-                // Фон с Liquid Glass эффектом при наведении
-                if isHovered {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
-                        )
-                }
-            }
-        )
         .animation(.easeInOut(duration: 0.15), value: isHovered)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onSelect()
+        }
     }
-    
+
     private func actionButton(icon: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
@@ -285,14 +366,14 @@ struct GlassButtonStyle: ButtonStyle {
         case compact
         case subtle
     }
-    
+
     let variant: Variant
     @State private var isHovered = false
-    
+
     init(variant: Variant = .standard) {
         self.variant = variant
     }
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(padding)
@@ -317,7 +398,7 @@ struct GlassButtonStyle: ButtonStyle {
                 }
             }
     }
-    
+
     private var padding: EdgeInsets {
         switch variant {
         case .standard:
@@ -328,7 +409,7 @@ struct GlassButtonStyle: ButtonStyle {
             return EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)
         }
     }
-    
+
     private var cornerRadius: CGFloat {
         switch variant {
         case .standard:
@@ -341,17 +422,24 @@ struct GlassButtonStyle: ButtonStyle {
     }
 }
 
+// MARK: - Simple Button Style
+
+struct SimpleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+    }
+}
+
 // MARK: - Preview
 
-#Preview {
-    MenuBarPopoverView(viewModel: {
+struct MenuBarPopoverView_Previews: PreviewProvider {
+    static var previews: some View {
         let vm = ServiceListViewModel()
-        // Мок данные для предпросмотра
         vm.services = [
             BrewService(name: "postgresql@14", status: "started", user: "user", pid: 12345, autostart: true, version: "14.0"),
             BrewService(name: "redis", status: "stopped", user: "user", pid: nil, autostart: false, version: "7.0"),
             BrewService(name: "nginx", status: "error", user: "user", pid: nil, autostart: true, version: "1.25"),
         ]
-        return vm
-    }())
+        return MenuBarPopoverView(viewModel: vm)
+    }
 }

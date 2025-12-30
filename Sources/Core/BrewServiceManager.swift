@@ -1,140 +1,194 @@
 import Foundation
 
-public enum BrewError: Error {
+public enum BrewError: Error, LocalizedError {
     case brewNotFound
     case executionFailed(String)
+    case invalidOutput(String)
+    case operationCancelled
+    case requiresAuthentication(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .brewNotFound:
+            return "Homebrew не найден. Убедитесь, что Homebrew установлен и находится в PATH"
+        case .executionFailed(let msg):
+            return "Ошибка выполнения brew: \(msg)"
+        case .invalidOutput(let msg):
+            return "Некорректный вывод от brew: \(msg)"
+        case .operationCancelled:
+            return "Операция отменена"
+        case .requiresAuthentication(let action):
+            return "Операция '\(action)' требует прав администратора"
+        }
+    }
+
+    public var recoverySuggestion: String? {
+        switch self {
+        case .brewNotFound:
+            return "Установите Homebrew с https://brew.sh"
+        case .executionFailed:
+            return "Проверьте доступность сервиса и наличие необходимых прав"
+        case .invalidOutput:
+            return "Попробуйте обновить Homebrew: brew update"
+        case .operationCancelled:
+            return "Повторите операцию"
+        case .requiresAuthentication:
+            return "Операция требует пароль администратора"
+        }
+    }
 }
 
 public final class BrewServiceManager {
+    private let fileManager = FileManager.default
+    private var _brewPath: String?
+
     public init() {}
 
-    func brewPath() -> String? {
+    public func brewPath() -> String? {
+        if let cached = _brewPath {
+            return cached
+        }
+
         let candidates = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew", "/bin/brew", "/usr/bin/brew", "brew"]
-        for c in candidates {
-            if c == "brew" { return c } // rely on PATH
-            if FileManager.default.isExecutableFile(atPath: c) {
-                return c
+        for candidate in candidates {
+            if candidate == "brew" {
+                _brewPath = candidate
+                return candidate
+            }
+            if fileManager.isExecutableFile(atPath: candidate) {
+                _brewPath = candidate
+                return candidate
             }
         }
         return nil
     }
 
-    public func servicesList() throws -> [BrewService] {
-        guard let brew = brewPath() else { throw BrewError.brewNotFound }
+    public func servicesList() async throws -> [BrewService] {
+        guard brewPath() != nil else { throw BrewError.brewNotFound }
 
-        let proc = Process()
-        proc.executableURL = URL(fileURLWithPath: brew)
-        proc.arguments = ["services", "list"]
-
-        let out = Pipe()
-        let err = Pipe()
-        proc.standardOutput = out
-        proc.standardError = err
-
-        try proc.run()
-        proc.waitUntilExit()
-
-        let data = out.fileHandleForReading.readDataToEndOfFile()
-        let errData = err.fileHandleForReading.readDataToEndOfFile()
-
-        if proc.terminationStatus != 0 {
-            let s = String(data: errData, encoding: .utf8) ?? "error"
-            throw BrewError.executionFailed(s)
-        }
-
-        let text = String(data: data, encoding: .utf8) ?? ""
-        return parseBrewServicesList(output: text)
+        let output = try await executeBrewCommand(arguments: ["services", "list"])
+        return parseBrewServicesList(output: output)
     }
 
-    // Very simple parser for default `brew services list` table output
+    private func executeBrewCommand(arguments: [String]) async throws -> String {
+        guard let brew = brewPath() else { throw BrewError.brewNotFound }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: brew)
+        process.arguments = arguments
+
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+
+        try await Task.sleep(nanoseconds: 0)
+
+        try process.run()
+        process.waitUntilExit()
+
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+
+        guard process.terminationStatus == 0 else {
+            let errorMessage = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Unknown error"
+
+            if errorMessage.contains("requires authentication") {
+                throw BrewError.requiresAuthentication(arguments.joined(separator: " "))
+            }
+            throw BrewError.executionFailed(errorMessage)
+        }
+
+        guard let output = String(data: outputData, encoding: .utf8) else {
+            throw BrewError.invalidOutput("Cannot decode command output")
+        }
+
+        return output
+    }
+
     func parseBrewServicesList(output: String) -> [BrewService] {
-        var results: [BrewService] = []
-        let lines = output.components(separatedBy: .newlines)
+        let lines = output.split(separator: "\n", omittingEmptySubsequences: true)
         guard lines.count > 1 else { return [] }
 
-        // Find header line index (first line containing "Status" and "Name" typically)
-        var startIndex = 0
-        for (i, l) in lines.enumerated() {
-            if l.lowercased().contains("status") && l.lowercased().contains("name") {
-                startIndex = i + 1
-                break
+        let headerIndex = lines.firstIndex { line in
+            line.lowercased().contains("status") && line.lowercased().contains("name")
+        }
+
+        guard let startIndex = headerIndex else { return [] }
+
+        let serviceLines = lines[(lines.index(after: startIndex))...]
+
+        let regex = try? NSRegularExpression(pattern: "^(\\S+)\\s+(\\S+)(?:\\s+(.*))?$", options: [])
+
+        return serviceLines.compactMap { line in
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty else { return nil }
+
+            let nsLine = trimmed as NSString
+            let range = NSRange(location: 0, length: nsLine.length)
+
+            guard let match = regex?.firstMatch(in: trimmed, options: [], range: range) else {
+                return nil
             }
-        }
-
-        // Parse lines using regex: name, status, rest
-        // Example lines:
-        // mysql   none
-        // nginx   started dchichmarev ~/Library/LaunchAgents/homebrew.mxcl.nginx.plist
-        let pattern = "^(\\S+)\\s+(\\S+)(?:\\s+(.*))?$"
-        let regex: NSRegularExpression?
-        do {
-            regex = try NSRegularExpression(pattern: pattern, options: [])
-        } catch {
-            return []
-        }
-
-        for i in startIndex..<lines.count {
-            let line = lines[i].trimmingCharacters(in: .whitespaces)
-            if line.isEmpty { continue }
-
-            let nsLine = line as NSString
-            guard let match = regex?.firstMatch(in: line, options: [], range: NSRange(location: 0, length: nsLine.length)) else { continue }
 
             let name = nsLine.substring(with: match.range(at: 1))
             let status = nsLine.substring(with: match.range(at: 2))
+
             var user = ""
-            var pid: Int? = nil
+            var pid: Int?
+
             if match.range(at: 3).location != NSNotFound {
                 let rest = nsLine.substring(with: match.range(at: 3))
-                // rest may contain user and file path; attempt to extract first token as user
-                let parts = rest.split(separator: " ", omittingEmptySubsequences: true).map { String($0) }
-                if parts.count > 0 {
+                let parts = rest.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+
+                if !parts.isEmpty {
                     user = parts[0]
-                    // if next token is a pid, parse it
-                    if parts.count > 1, let possiblePid = Int(parts[1]) {
-                        pid = possiblePid
+                    if parts.count > 1, let parsedPid = Int(parts[1]) {
+                        pid = parsedPid
                     }
                 }
             }
 
-            let autostart = status.lowercased().contains("started")
-            let svc = BrewService(name: name, status: status, user: user, pid: pid, autostart: autostart, version: nil)
-            results.append(svc)
+            return BrewService(
+                name: name,
+                status: status,
+                user: user,
+                pid: pid,
+                autostart: status.lowercased().contains("started"),
+                version: nil
+            )
         }
-
-        return results
     }
 
-    // Run an arbitrary `brew services <action> <service>` command and return stdout
-    public func runService(action: String, service: String) throws -> String {
-        guard let brew = brewPath() else { throw BrewError.brewNotFound }
-
-        let proc = Process()
-        proc.executableURL = URL(fileURLWithPath: brew)
-        proc.arguments = ["services", action, service]
-
-        let out = Pipe()
-        let err = Pipe()
-        proc.standardOutput = out
-        proc.standardError = err
-
-        try proc.run()
-        proc.waitUntilExit()
-
-        let data = out.fileHandleForReading.readDataToEndOfFile()
-        let errData = err.fileHandleForReading.readDataToEndOfFile()
-
-        let outStr = String(data: data, encoding: .utf8) ?? ""
-        if proc.terminationStatus != 0 {
-            let s = String(data: errData, encoding: .utf8) ?? outStr
-            throw BrewError.executionFailed(s)
-        }
-
-        return outStr
+    public func runService(action: String, service: String) async throws -> String {
+        try await executeBrewCommand(arguments: ["services", action, service])
     }
 
-    public func start(service: String) throws -> String { try runService(action: "start", service: service) }
-    public func stop(service: String) throws -> String { try runService(action: "stop", service: service) }
-    public func restart(service: String) throws -> String { try runService(action: "restart", service: service) }
-    public func reload(service: String) throws -> String { try runService(action: "reload", service: service) }
+    public func start(service: String) async throws -> String {
+        try await runService(action: "start", service: service)
+    }
+
+    public func stop(service: String) async throws -> String {
+        try await runService(action: "stop", service: service)
+    }
+
+    public func restart(service: String) async throws -> String {
+        try await runService(action: "restart", service: service)
+    }
+
+    public func reload(service: String) async throws -> String {
+        try await runService(action: "reload", service: service)
+    }
+
+    public func info(service: String) async throws -> String {
+        try await runService(action: "info", service: service)
+    }
+
+    public func startAll() async throws -> String {
+        try await executeBrewCommand(arguments: ["services", "start", "--all"])
+    }
+
+    public func stopAll() async throws -> String {
+        try await executeBrewCommand(arguments: ["services", "stop", "--all"])
+    }
 }

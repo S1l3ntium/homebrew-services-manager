@@ -41,6 +41,7 @@ check_file "Sources/App/ServiceListView.swift"
 check_file "Sources/App/ServiceDetailView.swift"
 check_file "Sources/App/ServiceListViewModel.swift"
 check_file "Sources/App/MenuBarController.swift"
+check_file "Sources/App/MenuBarPopoverView.swift"
 check_file "Sources/App/FocusableTextField.swift"
 
 # Check SystemModule
