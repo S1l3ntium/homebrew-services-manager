@@ -37,11 +37,7 @@ HomebrewFormula/
 IMPROVEMENTS.md
 FIXES_REPORT.md
 
-# Other
+# Local scripts and configuration (developer-specific)
 build-app-bundle.sh
-DISTRIBUTION.md
-HOMEBREW_CASK.md
-HOMEBREW_PUBLISHING.md
-homebrew-services-manager.rb
 PUBLISH.sh
-QUICKSTART_HOMEBREW.mdSCRIPTS_USAGE.md
+SCRIPTS_USAGE.md
