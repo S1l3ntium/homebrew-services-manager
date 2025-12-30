@@ -46,7 +46,7 @@ See [INSTALLATION.md](INSTALLATION.md) for detailed installation instructions.
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/homebrew-services-manager.git
+git clone https://github.com/S1l3ntium/homebrew-services-manager.git
 cd homebrew-services-manager
 ```
 
